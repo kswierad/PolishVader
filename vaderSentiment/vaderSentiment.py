@@ -645,10 +645,10 @@ if __name__ == '__main__':
         print(" - Analyze sentiment of NON ENGLISH text...for example:")
         print("  -- French, German, Spanish, Italian, Russian, Japanese, Arabic, Chinese(Simplified) , Chinese(Traditional)")
         print("  -- many other languages supported. \n")
-        languages = ["English", "French", "German", "Spanish", "Italian", "Russian", "Japanese", "Arabic", "Chinese(Simplified)", "Chinese(Traditional)"]
-        language_codes = ["en", "fr", "de", "es", "it", "ru", "ja", "ar", "zh-CN", "zh-TW"]
+        languages = ["English", "Polski", "German", "Spanish", "Italian", "Russian", "Japanese", "Arabic", "Chinese(Simplified)", "Chinese(Traditional)"]
+        language_codes = ["en", "pl", "de", "es", "it", "ru", "ja", "ar", "zh-CN", "zh-TW"]
         nonEnglish_sentences = ["I'm surprised to see just how amazingly helpful VADER is!",
-                                "Je suis surpris de voir comment VADER est incroyablement utile !",
+                                "Musimy coś zrobić sami :(",
                                 "Ich bin überrascht zu sehen, nur wie erstaunlich nützlich VADER!",
                                 "Me sorprende ver sólo cómo increíblemente útil VADER!",
                                 "Sono sorpreso di vedere solo come incredibilmente utile VADER è!",
