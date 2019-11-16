@@ -64,7 +64,7 @@ BOOSTER_DICT = \
      "niewiele": B_DECR, "niezbyt": B_DECR, "nieznacznie": B_DECR, "nieznaczny": B_DECR,
      "sporadyczny": B_DECR, "sporadycznie": B_DECR, "częściowo": B_DECR, "niewielki": B_DECR, "troszeczkę": B_DECR,
      "niewystarczająco": B_DECR, "niedostatecznie": B_DECR, "trochę": B_DECR, "troszkę": B_DECR, "w pewnym stopniu": B_DECR,
-     "raczej": B_DECR, "w pewnym sensie": B_DECR, "trochę jakby": B_DECR, "przynajmniej": B_DECR}
+     "raczej": B_DECR, "w pewnym sensie": B_DECR, "trochę jakby": B_DECR}
 
 # check for sentiment laden idioms that do not contain lexicon words (future work, not yet implemented)
 SENTIMENT_LADEN_IDIOMS = {"cut the mustard": 2, "hand to mouth": -2,
@@ -409,22 +409,27 @@ class SentimentIntensityAnalyzer(object):
             if negated([words_and_emoticons_lower[i - (start_i + 1)]]):  # 1 word preceding lexicon word (w/o stopwords)
                 valence = valence * N_SCALAR
         if start_i == 1:
-            if words_and_emoticons_lower[i - 2] == "never" and \
-                    (words_and_emoticons_lower[i - 1] == "so" or
-                     words_and_emoticons_lower[i - 1] == "this"):
+            if words_and_emoticons_lower[i - 2] == "nigdy" and \
+                    (words_and_emoticons_lower[i - 1] == "więc" or
+                     words_and_emoticons_lower[i - 1] == "dlatego" or
+                     words_and_emoticons_lower[i - 1] == "to"):  # dunno if translated correctly
                 valence = valence * 1.25
-            elif words_and_emoticons_lower[i - 2] == "without" and \
-                    words_and_emoticons_lower[i - 1] == "doubt":
+            elif words_and_emoticons_lower[i - 2] == "bez" and \
+                    (words_and_emoticons_lower[i - 1] == "wątpienia" or
+                     words_and_emoticons_lower[i - 1] == "wątpliwości"):
                 valence = valence
             elif negated([words_and_emoticons_lower[i - (start_i + 1)]]):  # 2 words preceding the lexicon word position
                 valence = valence * N_SCALAR
         if start_i == 2:
-            if words_and_emoticons_lower[i - 3] == "never" and \
-                    (words_and_emoticons_lower[i - 2] == "so" or words_and_emoticons_lower[i - 2] == "this") or \
-                    (words_and_emoticons_lower[i - 1] == "so" or words_and_emoticons_lower[i - 1] == "this"):
+            if words_and_emoticons_lower[i - 3] == "nigdy" and \
+                    (words_and_emoticons_lower[i - 2] == "więc" or words_and_emoticons_lower[i - 2] == "dlatego") or \
+                    (words_and_emoticons_lower[i - 1] == "więc" or words_and_emoticons_lower[i - 1] == "dlatego"):
                 valence = valence * 1.25
-            elif words_and_emoticons_lower[i - 3] == "without" and \
-                    (words_and_emoticons_lower[i - 2] == "doubt" or words_and_emoticons_lower[i - 1] == "doubt"):
+            elif words_and_emoticons_lower[i - 3] == "bez" and \
+                    ((words_and_emoticons_lower[i - 2] == "wątpienia" or
+                      words_and_emoticons_lower[i - 2] == "wątpliwości")
+                     or (words_and_emoticons_lower[i - 1] == "wątpienia" or
+                        words_and_emoticons_lower[i - 1] == "wątpliwości")):
                 valence = valence
             elif negated([words_and_emoticons_lower[i - (start_i + 1)]]):  # 3 words preceding the lexicon word position
                 valence = valence * N_SCALAR
@@ -532,6 +537,8 @@ if __name__ == '__main__':
                  "Książka była dobra.",  # positive sentence
                  "Przynajmniej nie jest okropny.",  # negated negative sentence with contraction
                  "Książka była tylko trochę dobra.",
+                 "To był bez wątpienia najlepszy obiad w mój życie",
+                 "To był najlepszy obiad w mój życie",
                  # qualified positive sentence is handled correctly (intensity adjusted)
                  "Fabuła była spoko, ale postacie słabe i zdjęcią okropne",
                  # mixed negation sentence
