@@ -569,30 +569,30 @@ if __name__ == '__main__':
     print("----------------------------------------------------")
 
     # input("\nPress Enter to continue the demo...\n")  # for DEMO purposes...
-
-    tricky_sentences = ["Sentiment analysis has never been good.",
-                        "Sentiment analysis has never been this good!",
-                        "Most automated sentiment analysis tools are shit.",
-                        "With VADER, sentiment analysis is the shit!",
-                        "Other sentiment analysis tools can be quite bad.",
-                        "On the other hand, VADER is quite bad ass",
-                        "VADER is such a badass!",  # slang with punctuation emphasis
-                        "Without a doubt, excellent idea.",
-                        "Roger Dodger is one of the most compelling variations on this theme.",
-                        "Roger Dodger is at least compelling as a variation on the theme.",
-                        "Roger Dodger is one of the least compelling variations on this theme.",
-                        "Not such a badass after all.",  # Capitalized negation with slang
-                        "Without a doubt, an excellent idea."  # "without {any} doubt" as negation
-                        ]
-    print("----------------------------------------------------")
-    print(" - Analyze examples of tricky sentences that cause trouble to other sentiment analysis tools.")
-    print("  -- special case idioms - e.g., 'never good' vs 'never this good', or 'bad' vs 'bad ass'.")
-    print("  -- special uses of 'least' as negation versus comparison \n")
-    for sentence in tricky_sentences:
-        vs = analyzer.polarity_scores(sentence)
-        print("{:-<69} {}".format(sentence, str(vs)))
-    print("----------------------------------------------------")
-
+    #
+    # tricky_sentences = ["Sentiment analysis has never been good.",
+    #                     "Sentiment analysis has never been this good!",
+    #                     "Most automated sentiment analysis tools are shit.",
+    #                     "With VADER, sentiment analysis is the shit!",
+    #                     "Other sentiment analysis tools can be quite bad.",
+    #                     "On the other hand, VADER is quite bad ass",
+    #                     "VADER is such a badass!",  # slang with punctuation emphasis
+    #                     "Without a doubt, excellent idea.",
+    #                     "Roger Dodger is one of the most compelling variations on this theme.",
+    #                     "Roger Dodger is at least compelling as a variation on the theme.",
+    #                     "Roger Dodger is one of the least compelling variations on this theme.",
+    #                     "Not such a badass after all.",  # Capitalized negation with slang
+    #                     "Without a doubt, an excellent idea."  # "without {any} doubt" as negation
+    #                     ]
+    # print("----------------------------------------------------")
+    # print(" - Analyze examples of tricky sentences that cause trouble to other sentiment analysis tools.")
+    # print("  -- special case idioms - e.g., 'never good' vs 'never this good', or 'bad' vs 'bad ass'.")
+    # print("  -- special uses of 'least' as negation versus comparison \n")
+    # for sentence in tricky_sentences:
+    #     vs = analyzer.polarity_scores(sentence)
+    #     print("{:-<69} {}".format(sentence, str(vs)))
+    # print("----------------------------------------------------")
+    #
     # input("\nPress Enter to continue the demo...\n")  # for DEMO purposes...
 
     print("----------------------------------------------------")
