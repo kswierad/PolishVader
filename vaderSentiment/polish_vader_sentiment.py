@@ -59,7 +59,7 @@ BOOSTER_DICT = \
      "bardzo": B_INCR, "bezgranicznie": B_INCR,
      "prawie": B_DECR, "ledwo": B_DECR, "ledwie": B_DECR, "z trudem": B_DECR, "zaledwie": B_DECR, "prawie wcale": B_DECR,
      "z trudnością": B_DECR, "z ledwością": B_DECR, "nieco": B_DECR, "dość": B_DECR,
-     "jakby": B_DECR, "tak jakby": B_DECR, "poniekąd": B_DECR, "niby": B_DECR,
+     "jakby": B_DECR, "tak jakby": B_DECR, "poniekąd": B_DECR, "niby": B_DECR, "tylko": B_DECR,
      "mniej": B_DECR, "trochę": B_DECR, "marginalny": B_DECR, "marginalnie": B_DECR, "niewielki": B_DECR,
      "niewiele": B_DECR, "niezbyt": B_DECR, "nieznacznie": B_DECR, "nieznaczny": B_DECR,
      "sporadyczny": B_DECR, "sporadycznie": B_DECR, "częściowo": B_DECR, "niewielki": B_DECR, "troszeczkę": B_DECR,
@@ -92,7 +92,7 @@ def negated(input_words, include_nt=True):
             return True
     if include_nt:
         for word in input_words:
-            if "n't" in word:
+            if "nie" in word:
                 return True
     '''if "least" in input_words:
         i = input_words.index("least")
@@ -283,13 +283,13 @@ class SentimentIntensityAnalyzer(object):
             valence = self.lexicon[item_lowercase]
 
             # check for "no" as negation for an adjacent lexicon item vs "no" as its own stand-alone lexicon item
-            if item_lowercase == "no" and words_and_emoticons[i + 1].lower() in self.lexicon:
+            if item_lowercase == "nie" and words_and_emoticons[i + 1].lower() in self.lexicon:
                 # don't use valence of "no" as a lexicon item. Instead set it's valence to 0.0 and negate the next item
                 valence = 0.0
-            if (i > 0 and words_and_emoticons[i - 1].lower() == "no") \
-                    or (i > 1 and words_and_emoticons[i - 2].lower() == "no") \
-                    or (i > 2 and words_and_emoticons[i - 3].lower() == "no" and words_and_emoticons[i - 1].lower() in [
-                "or", "nor"]):
+            if (i > 0 and words_and_emoticons[i - 1].lower() == "nie") \
+                    or (i > 1 and words_and_emoticons[i - 2].lower() == "nie") \
+                    or (i > 2 and words_and_emoticons[i - 3].lower() == "nie" and words_and_emoticons[i - 1].lower() in [
+                "lub", "ani"]):
                 valence = self.lexicon[item_lowercase] * N_SCALAR
 
             # check if sentiment laden word is in ALL CAPS (while others aren't)
@@ -318,11 +318,12 @@ class SentimentIntensityAnalyzer(object):
         sentiments.append(valence)
         return sentiments
 
+#TODO adjust to polish
     def _least_check(self, valence, words_and_emoticons, i):
         # check for negation case using "least"
         if i > 1 and words_and_emoticons[i - 1].lower() not in self.lexicon \
                 and words_and_emoticons[i - 1].lower() == "least":
-            if words_and_emoticons[i - 2].lower() != "at" and words_and_emoticons[i - 2].lower() != "very":
+            if words_and_emoticons[i - 2].lower() != "at" and words_and_emoticons[i - 2].lower() != "bardzo":
                 valence = valence * N_SCALAR
         elif i > 0 and words_and_emoticons[i - 1].lower() not in self.lexicon \
                 and words_and_emoticons[i - 1].lower() == "least":
@@ -333,8 +334,8 @@ class SentimentIntensityAnalyzer(object):
     def _but_check(words_and_emoticons, sentiments):
         # check for modification in sentiment due to contrastive conjunction 'but'
         words_and_emoticons_lower = [str(w).lower() for w in words_and_emoticons]
-        if 'but' in words_and_emoticons_lower:
-            bi = words_and_emoticons_lower.index('but')
+        if 'ale' in words_and_emoticons_lower:
+            bi = words_and_emoticons_lower.index('ale')
             for sentiment in sentiments:
                 si = sentiments.index(sentiment)
                 if si < bi:
@@ -398,6 +399,8 @@ class SentimentIntensityAnalyzer(object):
             valence = sum(idioms_valences) / float(len(idioms_valences))
         return valence
 
+
+#TODO to be adjusted to polish
     @staticmethod
     def _negation_check(valence, words_and_emoticons, start_i, i):
         words_and_emoticons_lower = [str(w).lower() for w in words_and_emoticons]
@@ -527,7 +530,7 @@ if __name__ == '__main__':
                  "VADER nie jest mądry, przystojny, ani zabawny.",  # negation sentence example
                  "Książka była dobra.",  # positive sentence
                  "Przynajmniej nie jest okropny.",  # negated negative sentence with contraction
-                 "Książka była tylko troche dobra.",
+                 "Książka była tylko trochę dobra.",
                  # qualified positive sentence is handled correctly (intensity adjusted)
                  "Fabuła była spoko, ale postacie słabe i zdjęcią okropne",
                  # mixed negation sentence
@@ -538,7 +541,13 @@ if __name__ == '__main__':
                  # mixed sentiment example with slang and constrastive conjunction "but"
                  "Pamiętaj żeby :) albo :D dzisiaj!",  # emoticons handled
                  "Catch utf-8 emoji such as 💘 and 💋 and 😁",  # emojis handled
-                 "Całkiem nie najgorzej"  # Capitalized negation
+                 "Całkiem nie najgorzej"
+                 """My, Polacy, mamy najlepszy i najgodniejszy Prezydent wszechczasów – to Andrzej Duda ! 
+                 Tyle co ten człowiek tylko przez kilka lat zrobił dla Polski – to ogromne osiągnięcia. 
+                 Nie będę wymieniał poszczególnych jego zasługa, bo lista jest bardzo długa, ale w dziedzinach takich jak
+                  bezpieczeństwo Polski i pokój na świecie, służba Polakom, reprezentowanie państwa polskiego,
+                   propagowanie przedsiębiorczości i biznesu, obronności kraju oraz rozwój Polski i
+                  Europy nasz Prezydent brał czynny, intensywny i systematyczny udział ! """# Capitalized negation
                  ]
 
     analyzer = SentimentIntensityAnalyzer()
