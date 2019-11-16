@@ -531,8 +531,10 @@ if __name__ == '__main__':
                  # qualified positive sentence is handled correctly (intensity adjusted)
                  "Fabuła była spoko, ale postacie słabe i zdjęcią okropne",
                  # mixed negation sentence
-                 "Dzisiaj SSIE!",  # negative slang with capitalization emphasis
-                 "Dzisiaj troche ssie! Ale jakoś przeżyje, lol",
+                 "Dzisiaj jest nieco niemiły dzień!",  # negative slang with capitalization emphasis
+                 "Dzisiaj jest niemiły dzień",
+                 "Tamta kobieta mnie  strasznie denerwuje",
+                 "Tamta kobieta mnie nieco denerwuje",
                  # mixed sentiment example with slang and constrastive conjunction "but"
                  "Pamiętaj żeby :) albo :D dzisiaj!",  # emoticons handled
                  "Catch utf-8 emoji such as 💘 and 💋 and 😁",  # emojis handled
