@@ -64,7 +64,7 @@ BOOSTER_DICT = \
      "niewiele": B_DECR, "niezbyt": B_DECR, "nieznacznie": B_DECR, "nieznaczny": B_DECR,
      "sporadyczny": B_DECR, "sporadycznie": B_DECR, "częściowo": B_DECR, "niewielki": B_DECR, "troszeczkę": B_DECR,
      "niewystarczająco": B_DECR, "niedostatecznie": B_DECR, "trochę": B_DECR, "troszkę": B_DECR, "w pewnym stopniu": B_DECR,
-     "raczej": B_DECR, "w pewnym sensie": B_DECR, "trochę jakby": B_DECR}
+     "raczej": B_DECR, "w pewnym sensie": B_DECR, "trochę jakby": B_DECR, "przynajmniej": B_DECR}
 
 # check for sentiment laden idioms that do not contain lexicon words (future work, not yet implemented)
 SENTIMENT_LADEN_IDIOMS = {"cut the mustard": 2, "hand to mouth": -2,
@@ -195,7 +195,7 @@ class SentimentIntensityAnalyzer(object):
     Give a sentiment intensity score to sentences.
     """
 
-    def __init__(self, lexicon_file="vader_lexicon.txt", emoji_lexicon="emoji_utf8_lexicon.txt"):
+    def __init__(self, lexicon_file="test3.txt", emoji_lexicon="emoji.txt"):
         _this_module_file_path_ = os.path.abspath(getsourcefile(lambda: 0))
         lexicon_full_filepath = os.path.join(os.path.dirname(_this_module_file_path_), lexicon_file)
         with codecs.open(lexicon_full_filepath, encoding='utf-8') as f:
@@ -514,29 +514,29 @@ class SentimentIntensityAnalyzer(object):
 
 if __name__ == '__main__':
     # --- examples -------
-    sentences = ["VADER is smart, handsome, and funny.",  # positive sentence example
-                 "VADER is smart, handsome, and funny!",
+    sentences = ["VADER jest mądry, przystojny i zabawny.",  # positive sentence example
+                 "VADER jest mądry, przystojny i zabawny!!",
                  # punctuation emphasis handled correctly (sentiment intensity adjusted)
-                 "VADER is very smart, handsome, and funny.",
+                 "VADER jest bardzo mądry, przystojny i zabawny!",
                  # booster words handled correctly (sentiment intensity adjusted)
-                 "VADER is VERY SMART, handsome, and FUNNY.",  # emphasis for ALLCAPS handled
-                 "VADER is VERY SMART, handsome, and FUNNY!!!",
+                 "VADER jest BARDZO MĄDRY, przystojny i zabawny!",  # emphasis for ALLCAPS handled
+                 "VADER jest BARDZO MĄDRY, przystojny i ZABAWNY!!!!!!",
                  # combination of signals - VADER appropriately adjusts intensity
-                 "VADER is VERY SMART, uber handsome, and FRIGGIN FUNNY!!!",
+                 "VADER jest BARDZO MĄDRY, ultra przystojny i  NIEZIEMSKO ZABAWNY!!!!!!",
                  # booster words & punctuation make this close to ceiling for score
-                 "VADER is not smart, handsome, nor funny.",  # negation sentence example
-                 "The book was good.",  # positive sentence
-                 "At least it isn't a horrible book.",  # negated negative sentence with contraction
-                 "The book was only kind of good.",
+                 "VADER nie jest mądry, przystojny, ani zabawny.",  # negation sentence example
+                 "Książka była dobra.",  # positive sentence
+                 "Przynajmniej nie jest okropna.",  # negated negative sentence with contraction
+                 "Książka była tylko troche dobra.",
                  # qualified positive sentence is handled correctly (intensity adjusted)
-                 "The plot was good, but the characters are uncompelling and the dialog is not great.",
+                 "Fabuła była spoko, ale postacie słabe i zdjęcią okropne",
                  # mixed negation sentence
-                 "Today SUX!",  # negative slang with capitalization emphasis
-                 "Today only kinda sux! But I'll get by, lol",
+                 "Dzisiaj SSIE!",  # negative slang with capitalization emphasis
+                 "Dzisiaj troche ssie! Ale jakoś przeżyje, lol",
                  # mixed sentiment example with slang and constrastive conjunction "but"
-                 "Make sure you :) or :D today!",  # emoticons handled
+                 "Pamiętaj żeby :) albo :D dzisiaj!",  # emoticons handled
                  "Catch utf-8 emoji such as 💘 and 💋 and 😁",  # emojis handled
-                 "Not bad at all"  # Capitalized negation
+                 "Całkiem nie najgorzej"  # Capitalized negation
                  ]
 
     analyzer = SentimentIntensityAnalyzer()
