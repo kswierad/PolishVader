@@ -261,8 +261,9 @@ class SentimentIntensityAnalyzer(object):
             if item.lower() in BOOSTER_DICT:
                 sentiments.append(valence)
                 continue
-            if (i < len(words_and_emoticons) - 1 and item.lower() == "kind" and
-                    words_and_emoticons[i + 1].lower() == "of"):
+            #kind of -> tak jakby
+            if (i < len(words_and_emoticons) - 1 and item.lower() == "tak" and
+                    words_and_emoticons[i + 1].lower() == "jakby"):
                 sentiments.append(valence)
                 continue
 
