@@ -49,12 +49,12 @@ BOOSTER_DICT = \
      "wspaniale": B_INCR, "cholernie": B_INCR, "cholerny": B_INCR,
      "zajebiście": B_INCR, "zajebisty": B_INCR, "w pełni": B_INCR,
      "zdecydowanie": B_INCR, "wysoce": B_INCR, "wielce": B_INCR,
-     "niezwykły": B_INCR, "niezwykle": B_INCR, "intensywnie": B_INCR,
+     "niezwykły": B_INCR, "niezwykle": B_INCR, "intensywnie": B_INCR, "nieziemsko": B_INCR,
      "główny": B_INCR, "głównie": B_INCR, "więcej": B_INCR, "bardziej": B_INCR, "w większości": B_INCR, "w szczególności": B_INCR,
      "jedynie": B_INCR, "dosyć": B_INCR, "serio": B_INCR, "znacząco": B_INCR,
      "tak": B_INCR, "istotnie": B_INCR, "zasadniczo": B_INCR,
      "dogłębnie": B_INCR, "zupełny": B_INCR, "totalnie": B_INCR, "oblrzymi": B_INCR, "niesamowicie": B_INCR,
-     "niesamowity": B_INCR, "ogromny": B_INCR, "mega": B_INCR,
+     "niesamowity": B_INCR, "ogromny": B_INCR, "mega": B_INCR, "ultra": B_INCR,
      "super": B_INCR, "niewyobrażalnie": B_INCR, "niezwyczajnie": B_INCR, "absolutny": B_INCR, "bezgraniczny": B_INCR,
      "bardzo": B_INCR, "bezgranicznie": B_INCR,
      "prawie": B_DECR, "ledwo": B_DECR, "ledwie": B_DECR, "z trudem": B_DECR, "zaledwie": B_DECR, "prawie wcale": B_DECR,
@@ -526,7 +526,7 @@ if __name__ == '__main__':
                  # booster words & punctuation make this close to ceiling for score
                  "VADER nie jest mądry, przystojny, ani zabawny.",  # negation sentence example
                  "Książka była dobra.",  # positive sentence
-                 "Przynajmniej nie jest okropna.",  # negated negative sentence with contraction
+                 "Przynajmniej nie jest okropny.",  # negated negative sentence with contraction
                  "Książka była tylko troche dobra.",
                  # qualified positive sentence is handled correctly (intensity adjusted)
                  "Fabuła była spoko, ale postacie słabe i zdjęcią okropne",
