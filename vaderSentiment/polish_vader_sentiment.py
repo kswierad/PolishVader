@@ -195,7 +195,7 @@ class SentimentIntensityAnalyzer(object):
     Give a sentiment intensity score to sentences.
     """
 
-    def __init__(self, lexicon_file="test3.txt", emoji_lexicon="emoji.txt"):
+    def __init__(self, lexicon_file="polish_vader_dictionary.txt", emoji_lexicon="emoji.txt"):
         _this_module_file_path_ = os.path.abspath(getsourcefile(lambda: 0))
         lexicon_full_filepath = os.path.join(os.path.dirname(_this_module_file_path_), lexicon_file)
         with codecs.open(lexicon_full_filepath, encoding='utf-8') as f:
@@ -549,7 +549,7 @@ if __name__ == '__main__':
                  # mixed sentiment example with slang and constrastive conjunction "but"
                  "Pamiętaj żeby :) albo :D dzisiaj!",  # emoticons handled
                  "Catch utf-8 emoji such as 💘 and 💋 and 😁",  # emojis handled
-                 "Całkiem nie najgorzej"
+                 "Całkiem nie najgorzej",
                  """My, Polacy, mamy najlepszy i najgodniejszy Prezydent wszechczasów – to Andrzej Duda ! 
                  Tyle co ten człowiek tylko przez kilka lat zrobił dla Polski – to ogromne osiągnięcia. 
                  Nie będę wymieniał poszczególnych jego zasługa, bo lista jest bardzo długa, ale w dziedzinach takich jak
@@ -614,95 +614,6 @@ if __name__ == '__main__':
     #
     # input("\nPress Enter to continue the demo...\n")  # for DEMO purposes...
 
-    print("----------------------------------------------------")
-    print(
-        " - VADER works best when analysis is done at the sentence level (but it can work on single words or entire novels).")
-    paragraph = "It was one of the worst movies I've seen, despite good reviews. Unbelievably bad acting!! Poor direction. VERY poor production. The movie was bad. Very bad movie. VERY BAD movie!"
-    print("  -- For example, given the following paragraph text from a hypothetical movie review:\n\t'{}'".format(
-        paragraph))
-    print(
-        "  -- You could use NLTK to break the paragraph into sentence tokens for VADER, then average the results for the paragraph like this: \n")
-    # simple example to tokenize paragraph into sentences for VADER
-    from nltk import tokenize
 
-    sentence_list = tokenize.sent_tokenize(paragraph)
-    paragraphSentiments = 0.0
-    for sentence in sentence_list:
-        vs = analyzer.polarity_scores(sentence)
-        print("{:-<69} {}".format(sentence, str(vs["compound"])))
-        paragraphSentiments += vs["compound"]
-    print("AVERAGE SENTIMENT FOR PARAGRAPH: \t" + str(round(paragraphSentiments / len(sentence_list), 4)))
-    print("----------------------------------------------------")
-
-    # input("\nPress Enter to continue the demo...\n")  # for DEMO purposes...
-
-    print("----------------------------------------------------")
-    print(" - Analyze sentiment of IMAGES/VIDEO data based on annotation 'tags' or image labels. \n")
-    conceptList = ["balloons", "cake", "candles", "happy birthday", "friends", "laughing", "smiling", "party"]
-    conceptSentiments = 0.0
-    for concept in conceptList:
-        vs = analyzer.polarity_scores(concept)
-        print("{:-<15} {}".format(concept, str(vs['compound'])))
-        conceptSentiments += vs["compound"]
-    print("AVERAGE SENTIMENT OF TAGS/LABELS: \t" + str(round(conceptSentiments / len(conceptList), 4)))
-    print("\t")
-    conceptList = ["riot", "fire", "fight", "blood", "mob", "war", "police", "tear gas"]
-    conceptSentiments = 0.0
-    for concept in conceptList:
-        vs = analyzer.polarity_scores(concept)
-        print("{:-<15} {}".format(concept, str(vs['compound'])))
-        conceptSentiments += vs["compound"]
-    print("AVERAGE SENTIMENT OF TAGS/LABELS: \t" + str(round(conceptSentiments / len(conceptList), 4)))
-    print("----------------------------------------------------")
-
-    # input("\nPress Enter to continue the demo...")  # for DEMO purposes...
-
-    do_translate = input(
-        "\nWould you like to run VADER demo examples with NON-ENGLISH text? (Note: requires Internet access) \n Type 'y' or 'n', then press Enter: ")
-    if do_translate.lower().lstrip().__contains__("y"):
-        print("\n----------------------------------------------------")
-        print(" - Analyze sentiment of NON ENGLISH text...for example:")
-        print(
-            "  -- French, German, Spanish, Italian, Russian, Japanese, Arabic, Chinese(Simplified) , Chinese(Traditional)")
-        print("  -- many other languages supported. \n")
-        languages = ["English", "Polski", "German", "Spanish", "Italian", "Russian", "Japanese", "Arabic",
-                     "Chinese(Simplified)", "Chinese(Traditional)"]
-        language_codes = ["en", "pl", "de", "es", "it", "ru", "ja", "ar", "zh-CN", "zh-TW"]
-        nonEnglish_sentences = ["I'm surprised to see just how amazingly helpful VADER is!",
-                                "Musimy coś zrobić sami :(",
-                                "Ich bin überrascht zu sehen, nur wie erstaunlich nützlich VADER!",
-                                "Me sorprende ver sólo cómo increíblemente útil VADER!",
-                                "Sono sorpreso di vedere solo come incredibilmente utile VADER è!",
-                                "Я удивлен увидеть, как раз как удивительно полезно ВЕЙДЕРА!",
-                                "私はちょうどどのように驚くほど役に立つベイダーを見て驚いています!",
-                                "أنا مندهش لرؤية فقط كيف مثير للدهشة فيدر فائدة!",
-                                "我很惊讶地看到VADER是如此有用!",
-                                "我很驚訝地看到VADER是如此有用!"
-                                ]
-        for sentence in nonEnglish_sentences:
-            to_lang = "en"
-            from_lang = language_codes[nonEnglish_sentences.index(sentence)]
-            if (from_lang == "en") or (from_lang == "en-US"):
-                translation = sentence
-                translator_name = "No translation needed"
-            else:  # please note usage limits for My Memory Translation Service:   http://mymemory.translated.net/doc/usagelimits.php
-                # using   MY MEMORY NET   http://mymemory.translated.net
-                api_url = "http://mymemory.translated.net/api/get?q={}&langpair={}|{}".format(sentence, from_lang,
-                                                                                              to_lang)
-                hdrs = {
-                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-                    'Accept-Encoding': 'none',
-                    'Accept-Language': 'en-US,en;q=0.8',
-                    'Connection': 'keep-alive'}
-                response = requests.get(api_url, headers=hdrs)
-                response_json = json.loads(response.text)
-                translation = response_json["responseData"]["translatedText"]
-                translator_name = "MemoryNet Translation Service"
-            vs = analyzer.polarity_scores(translation)
-            print("- {: <8}: {: <69}\t {} ({})".format(languages[nonEnglish_sentences.index(sentence)], sentence,
-                                                       str(vs['compound']), translator_name))
-        print("----------------------------------------------------")
 
     print("\n\n Demo Done!")
