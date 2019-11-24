@@ -560,19 +560,7 @@ if __name__ == '__main__':
 
     analyzer = SentimentIntensityAnalyzer()
 
-    print("----------------------------------------------------")
-    print(" - Analyze typical example cases, including handling of:")
-    print("  -- negations")
-    print("  -- punctuation emphasis & punctuation flooding")
-    print("  -- word-shape as emphasis (capitalization difference)")
-    print("  -- degree modifiers (intensifiers such as 'very' and dampeners such as 'kind of')")
-    print("  -- slang words as modifiers such as 'uber' or 'friggin' or 'kinda'")
-    print("  -- contrastive conjunction 'but' indicating a shift in sentiment; sentiment of later text is dominant")
-    print("  -- use of contractions as negations")
-    print("  -- sentiment laden emoticons such as :) and :D")
-    print("  -- utf-8 encoded emojis such as 💘 and 💋 and 😁")
-    print("  -- sentiment laden slang words (e.g., 'sux')")
-    print("  -- sentiment laden initialisms and acronyms (for example: 'lol') \n")
+
     for sentence in sentences:
         vs = analyzer.polarity_scores(sentence)
         print("{:-<65} {}".format(sentence, str(vs)))
@@ -613,7 +601,5 @@ if __name__ == '__main__':
     # print("----------------------------------------------------")
     #
     # input("\nPress Enter to continue the demo...\n")  # for DEMO purposes...
-
-
 
     print("\n\n Demo Done!")
