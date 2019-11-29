@@ -513,9 +513,10 @@ class SentimentIntensityAnalyzer(object):
                 valence = valence * N_SCALAR
         if start_i == 2:
             if words_and_emoticons_lower[i - 3] == "nigdy" and \
-                    (words_and_emoticons_lower[i - 2] == "więc" or words_and_emoticons_lower[i - 2] == "dlatego") or \
-                    (words_and_emoticons_lower[i - 1] == "więc" or words_and_emoticons_lower[i - 1] == "dlatego"):
+                    words_and_emoticons_lower[i - 2] == "nie":
+
                 valence = valence * 1.25
+                #print(words_and_emoticons[i] + str(valence))
             elif words_and_emoticons_lower[i - 3] == "bez" and \
                     ((words_and_emoticons_lower[i - 2] == "wątpienia" or
                       words_and_emoticons_lower[i - 2] == "wątpliwości")
@@ -574,6 +575,7 @@ class SentimentIntensityAnalyzer(object):
         return pos_sum, neg_sum, neu_count
 
     def score_valence(self, sentiments, text):
+        #print(sentiments)
         if sentiments:
             sum_s = float(sum(sentiments))
             # compute and add emphasis from punctuation in text
@@ -612,88 +614,82 @@ class SentimentIntensityAnalyzer(object):
         return sentiment_dict
 
 
-if __name__ == '__main__':
-    # --- examples -------
-    sentences = ["VADER jest mądrym, przystojna i zabawny.",  # positive sentence example
-                 "VADER jest mądry, przystojny i zabawny!!",
-                 # punctuation emphasis handled correctly (sentiment intensity adjusted)
-                 "VADER jest bardzo mądry, przystojny i zabawny!",
-                 # booster words handled correctly (sentiment intensity adjusted)
-                 "VADER jest BARDZO MĄDRY, przystojny i zabawny!",  # emphasis for ALLCAPS handled
-                 "VADER jest BARDZO MĄDRY, przystojny i ZABAWNY!!!!!!",
-                 # combination of signals - VADER appropriately adjusts intensity
-                 "VADER jest BARDZO MĄDRY, ultra przystojny i  NIEZIEMSKO ZABAWNY!!!!!!",
-                 # booster words & punctuation make this close to ceiling for score
-                 "VADER nie jest mądry, przystojny, ani zabawny.",  # negation sentence example
-                 "Książka była dobra.",  # positive sentence
-                 "Przynajmniej nie jest okropny.",  # negated negative sentence with contraction
-                 "Książka była tylko trochę dobra.",
-                 "To był bez wątpienia najlepszy obiad w moim życiu",
-                 "To był najlepszy obiad w moim życiu",
-                 # qualified positive sentence is handled correctly (intensity adjusted)
-                 "Fabuła była spoko, ale postacie słabe i zdjęcią okropne",
-                 "Ale on jest chujem",
-                 # mixed negation sentence
-                 "Dzisiaj jest nieco niemiły dzień!",  # negative slang with capitalization emphasis
-                 "Dzisiaj jest niemiły dzień",
-                 "Tamta kobieta mnie  strasznie denerwuje",
-                 "Tamta kobieta mnie nieco denerwuje",
-                 # mixed sentiment example with slang and constrastive conjunction "but"
-                 "Pamiętaj żeby :) albo :D dzisiaj!",  # emoticons handled
-                 "Catch utf-8 emoji such as 💘 and 💋 and 😁",  # emojis handled
-                 "Całkiem nie najgorzej",
-                 """My, Polacy, mamy najlepszy i najgodniejszy Prezydent wszechczasów – to Andrzej Duda ! 
-                 Tyle co ten człowiek tylko przez kilka lat zrobił dla Polski – to ogromne osiągnięcia. 
-                 Nie będę wymieniał poszczególnych jego zasługa, bo lista jest bardzo długa, ale w dziedzinach takich jak
-                  bezpieczeństwo Polski i pokój na świecie, służba Polakom, reprezentowanie państwa polskiego,
-                   propagowanie przedsiębiorczości i biznesu, obronności kraju oraz rozwój Polski i
-                  Europy nasz Prezydent brał czynny, intensywny i systematyczny udział ! """# Capitalized negation
-                 ]
-
-
-    analyzer = SentimentIntensityAnalyzer()
-
-
-    for sentence in sentences:
-        #sentence = simplify_polish_words(sentence)
-        vs = analyzer.polarity_scores(sentence)
-        print("{:-<65} {}".format(sentence, str(vs)))
-    print("----------------------------------------------------")
-    print(" - About the scoring: ")
-    print("""  -- The 'compound' score is computed by summing the valence scores of each word in the lexicon, adjusted
-     according to the rules, and then normalized to be between -1 (most extreme negative) and +1 (most extreme positive).
-     This is the most useful metric if you want a single unidimensional measure of sentiment for a given sentence.
-     Calling it a 'normalized, weighted composite score' is accurate.""")
-    print("""  -- The 'pos', 'neu', and 'neg' scores are ratios for proportions of text that fall in each category (so these
-     should all add up to be 1... or close to it with float operation).  These are the most useful metrics if
-     you want multidimensional measures of sentiment for a given sentence.""")
-    print("----------------------------------------------------")
-
-    # input("\nPress Enter to continue the demo...\n")  # for DEMO purposes...
-    #
-    # tricky_sentences = ["Sentiment analysis has never been good.",
-    #                     "Sentiment analysis has never been this good!",
-    #                     "Most automated sentiment analysis tools are shit.",
-    #                     "With VADER, sentiment analysis is the shit!",
-    #                     "Other sentiment analysis tools can be quite bad.",
-    #                     "On the other hand, VADER is quite bad ass",
-    #                     "VADER is such a badass!",  # slang with punctuation emphasis
-    #                     "Without a doubt, excellent idea.",
-    #                     "Roger Dodger is one of the most compelling variations on this theme.",
-    #                     "Roger Dodger is at least compelling as a variation on the theme.",
-    #                     "Roger Dodger is one of the least compelling variations on this theme.",
-    #                     "Not such a badass after all.",  # Capitalized negation with slang
-    #                     "Without a doubt, an excellent idea."  # "without {any} doubt" as negation
-    #                     ]
-    # print("----------------------------------------------------")
-    # print(" - Analyze examples of tricky sentences that cause trouble to other sentiment analysis tools.")
-    # print("  -- special case idioms - e.g., 'never good' vs 'never this good', or 'bad' vs 'bad ass'.")
-    # print("  -- special uses of 'least' as negation versus comparison \n")
-    # for sentence in tricky_sentences:
-    #     vs = analyzer.polarity_scores(sentence)
-    #     print("{:-<69} {}".format(sentence, str(vs)))
-    # print("----------------------------------------------------")
-    #
-    # input("\nPress Enter to continue the demo...\n")  # for DEMO purposes...
-
-    print("\n\n Demo Done!")
+# if __name__ == '__main__':
+#     # --- examples -------
+#     sentences = ["VADER jest mądrym, przystojna i zabawny.",  # positive sentence example
+#                  "VADER jest mądry, przystojny i zabawny!!",
+#                  # punctuation emphasis handled correctly (sentiment intensity adjusted)
+#                  "VADER jest bardzo mądry, przystojny i zabawny!",
+#                  # booster words handled correctly (sentiment intensity adjusted)
+#                  "VADER jest BARDZO MĄDRY, przystojny i zabawny!",  # emphasis for ALLCAPS handled
+#                  "VADER jest BARDZO MĄDRY, przystojny i ZABAWNY!!!!!!",
+#                  # combination of signals - VADER appropriately adjusts intensity
+#                  "VADER jest BARDZO MĄDRY, ultra przystojny i  NIEZIEMSKO ZABAWNY!!!!!!",
+#                  # booster words & punctuation make this close to ceiling for score
+#                  "VADER nie jest mądry, przystojny, ani zabawny.",  # negation sentence example
+#                  "Książka była dobra.",  # positive sentence
+#                  "Przynajmniej nie jest okropny.",  # negated negative sentence with contraction
+#                  "Książka była tylko trochę dobra.",
+#                  "To był bez wątpienia najlepszy obiad w moim życiu",
+#                  "To był najlepszy obiad w moim życiu",
+#                  # qualified positive sentence is handled correctly (intensity adjusted)
+#                  "Fabuła była spoko, ale postacie słabe i zdjęcią okropne",
+#                  "Ale on jest chujem",
+#                  # mixed negation sentence
+#                  "Dzisiaj jest nieco niemiły dzień!",  # negative slang with capitalization emphasis
+#                  "Dzisiaj jest niemiły dzień",
+#                  "Tamta kobieta mnie  strasznie denerwuje",
+#                  "Tamta kobieta mnie nieco denerwuje",
+#                  # mixed sentiment example with slang and constrastive conjunction "but"
+#                  "Pamiętaj żeby :) albo :D dzisiaj!",  # emoticons handled
+#                  "Catch utf-8 emoji such as 💘 and 💋 and 😁",  # emojis handled
+#                  "Całkiem nie najgorzej",
+#                  """My, Polacy, mamy najlepszy i najgodniejszy Prezydent wszechczasów – to Andrzej Duda !
+#                  Tyle co ten człowiek tylko przez kilka lat zrobił dla Polski – to ogromne osiągnięcia.
+#                  Nie będę wymieniał poszczególnych jego zasługa, bo lista jest bardzo długa, ale w dziedzinach takich jak
+#                   bezpieczeństwo Polski i pokój na świecie, służba Polakom, reprezentowanie państwa polskiego,
+#                    propagowanie przedsiębiorczości i biznesu, obronności kraju oraz rozwój Polski i
+#                   Europy nasz Prezydent brał czynny, intensywny i systematyczny udział ! """# Capitalized negation
+#                  ]
+#
+#
+#     analyzer = SentimentIntensityAnalyzer()
+#
+#
+#     for sentence in sentences:
+#         #sentence = simplify_polish_words(sentence)
+#         vs = analyzer.polarity_scores(sentence)
+#         print("{:-<65} {}".format(sentence, str(vs)))
+#     print("----------------------------------------------------")
+#     print(" - About the scoring: ")
+#     print("""  -- The 'compound' score is computed by summing the valence scores of each word in the lexicon, adjusted
+#      according to the rules, and then normalized to be between -1 (most extreme negative) and +1 (most extreme positive).
+#      This is the most useful metric if you want a single unidimensional measure of sentiment for a given sentence.
+#      Calling it a 'normalized, weighted composite score' is accurate.""")
+#     print("""  -- The 'pos', 'neu', and 'neg' scores are ratios for proportions of text that fall in each category (so these
+#      should all add up to be 1... or close to it with float operation).  These are the most useful metrics if
+#      you want multidimensional measures of sentiment for a given sentence.""")
+#     print("----------------------------------------------------")
+#
+#     input("\nPress Enter to continue the demo...\n")  # for DEMO purposes...
+#
+#     tricky_sentences = ["Analiza sensdtymentu nigdy nie była dobra.",
+#                         "Analiza sentsdymentu nigdy nie była TAK dobra!",
+#                         "Większość automatycznych narzędzi analizy sentymentu jest do dupy",
+#                         "Z VADEREM, analiza sentymentu to jest to!",
+#                         "Inne narzędzia analizy sentymentu są dość słabe",
+#                         "Z drugiej strony, Vader jest dość dobry",
+#                         "Vader jest fajowy!!",  # slang with punctuation emphasis
+#                         "Bez wątpienia, świetny pomysł",
+#                         "Jednak nie taki dobry",  # Capitalized negation with slang
+#                         ]
+#     print("----------------------------------------------------")
+#     print(" - Analyze examples of tricky sentences that cause trouble to other sentiment analysis tools.")
+#     print("  -- special case idioms - e.g., 'never good' vs 'never this good', or 'bad' vs 'bad ass'.")
+#     print("  -- special uses of 'least' as negation versus comparison \n")
+#     for sentence in tricky_sentences:
+#         vs = analyzer.polarity_scores(sentence)
+#         print("{:-<69} {}".format(sentence, str(vs)))
+#     print("----------------------------------------------------")
+#
+#     print("\n\n Demo Done!")
