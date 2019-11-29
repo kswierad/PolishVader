@@ -153,6 +153,33 @@ def scalar_inc_dec(word, valence, is_cap_diff):
     return scalar
 
 
+def simplify_polish_words(sentence):
+    response = requests.post('http://localhost:9200/?output_format=conll', data=sentence.encode('utf-8'))
+    if response.status_code != 200:
+        print("requesting server failed")
+
+    string_response = str(response.content, 'utf8')
+    words = string_response.split("\\")
+    words_splitted = words[0].split()
+
+    list_of_skipped_words = ["disamb", "none", "space", "conj", "interp", "newline", "comp", "qub", "adv",
+                                 "pred"]
+    for word in words_splitted:
+        if word in list_of_skipped_words or ":" in word:
+            words_splitted.remove(word)
+
+        # second iteration, because the first one doesn't remove "disamb" w
+    for word in words_splitted:
+        if word in list_of_skipped_words or ":" in word:
+            words_splitted.remove(word)
+
+        # getting every second element as those are tagged words
+    words_splitted = words_splitted[1::2]
+    simplified_sentence = ' '.join(map(str, words_splitted))
+
+    return simplified_sentence
+
+
 class SentiText(object):
     """
     Identify sentiment-relevant string-level properties of input text.
@@ -163,6 +190,7 @@ class SentiText(object):
             text = str(text).encode('utf-8')
         self.text = text
         self.words_and_emoticons = self._words_and_emoticons()
+        self.base_words = self._base_words()
         # doesn't separate words from\
         # adjacent punctuation (keeps emoticons & contractions)
         self.is_cap_diff = allcap_differential(self.words_and_emoticons)
@@ -190,18 +218,33 @@ class SentiText(object):
         stripped = list(map(self._strip_punc_if_word, wes))
         return stripped
 
+    def _base_words(self):
+        """
+        Removes leading and trailing puncutation
+        Leaves contractions and most emoticons
+            Does not preserve punc-plus-letter emoticons (e.g. :D)
+        """
+        wes = simplify_polish_words(self.text).split()
+        stripped = list(map(self._strip_punc_if_word, wes))
+        return stripped
+
 
 class SentimentIntensityAnalyzer(object):
     """
     Give a sentiment intensity score to sentences.
     """
 
-    def __init__(self, lexicon_file="polish_vader_dictionary.txt", emoji_lexicon="emoji.txt"):
+    def __init__(self, lexicon_file="polish_vader_dictionary.txt", emoji_lexicon="emoji.txt", base_file="base_polish.txt"):
         _this_module_file_path_ = os.path.abspath(getsourcefile(lambda: 0))
         lexicon_full_filepath = os.path.join(os.path.dirname(_this_module_file_path_), lexicon_file)
         with codecs.open(lexicon_full_filepath, encoding='utf-8') as f:
             self.lexicon_full_filepath = f.read()
+        base_full_filepath = os.path.join(os.path.dirname(_this_module_file_path_), base_file)
+        with codecs.open(base_full_filepath, encoding='utf-8') as f:
+            self.base_full_filepath = f.read()
         self.lexicon = self.make_lex_dict()
+        self.base = self.make_base_dict()
+
 
         emoji_full_filepath = os.path.join(os.path.dirname(_this_module_file_path_), emoji_lexicon)
         with codecs.open(emoji_full_filepath, encoding='utf-8') as f:
@@ -219,6 +262,18 @@ class SentimentIntensityAnalyzer(object):
             (word, measure) = line.strip().split('\t')[0:2]
             lex_dict[word] = float(measure)
         return lex_dict
+
+    def make_base_dict(self):
+        """
+        Convert base file to a dictionary
+        """
+        base_dict = {}
+        for line in self.base_full_filepath.rstrip('\n').split('\n'):
+            if not line:
+                continue
+            (word, measure) = line.strip().split('\t')[0:2]
+            base_dict[word] = float(measure)
+        return base_dict
 
     def make_emoji_dict(self):
         """
@@ -279,13 +334,15 @@ class SentimentIntensityAnalyzer(object):
     def sentiment_valence(self, valence, sentitext, item, i, sentiments):
         is_cap_diff = sentitext.is_cap_diff
         words_and_emoticons = sentitext.words_and_emoticons
+        base_words = sentitext.base_words
         item_lowercase = item.lower()
         if item_lowercase in self.lexicon:
             # get the sentiment valence
             valence = self.lexicon[item_lowercase]
 
             # check for "no" as negation for an adjacent lexicon item vs "no" as its own stand-alone lexicon item
-            if item_lowercase == "nie" and words_and_emoticons[i + 1].lower() in self.lexicon:
+            if item_lowercase == "nie" and \
+                    (words_and_emoticons[i + 1].lower() in self.lexicon or base_words[i + 1].lower() in self.base):
                 # don't use valence of "no" as a lexicon item. Instead set it's valence to 0.0 and negate the next item
                 valence = 0.0
             if (i > 0 and words_and_emoticons[i - 1].lower() == "nie") \
@@ -305,7 +362,8 @@ class SentimentIntensityAnalyzer(object):
                 # dampen the scalar modifier of preceding words and emoticons
                 # (excluding the ones that immediately preceed the item) based
                 # on their distance from the current item.
-                if i > start_i and words_and_emoticons[i - (start_i + 1)].lower() not in self.lexicon:
+                if i > start_i and words_and_emoticons[i - (start_i + 1)].lower()\
+                        not in self.lexicon and base_words[i - (start_i + 1)].lower() not in self.base:
                     s = scalar_inc_dec(words_and_emoticons[i - (start_i + 1)], valence, is_cap_diff)
                     if start_i == 1 and s != 0:
                         s = s * 0.95
@@ -316,21 +374,53 @@ class SentimentIntensityAnalyzer(object):
                     if start_i == 2:
                         valence = self._special_idioms_check(valence, words_and_emoticons, i)
 
-            valence = self._least_check(valence, words_and_emoticons, i)
+            if i > 0 and item.lower() == "przynajmniej":
+                valence = valence * N_SCALAR
+
+        elif base_words[i].lower() in self.base:
+            item_lowercase = base_words[i].lower()
+            # get the sentiment valence
+            valence = self.base[item_lowercase]
+
+            # check for "no" as negation for an adjacent lexicon item vs "no" as its own stand-alone lexicon item
+            if item_lowercase == "nie" and\
+                    (words_and_emoticons[i + 1].lower() in self.lexicon or base_words[i + 1].lower() in self.base):
+                # don't use valence of "no" as a lexicon item. Instead set it's valence to 0.0 and negate the next item
+                valence = 0.0
+            if (i > 0 and base_words[i - 1].lower() == "nie") \
+                    or (i > 1 and base_words[i - 2].lower() == "nie") \
+                    or (
+                    i > 2 and base_words[i - 3].lower() == "nie" and base_words[i - 1].lower() in [
+                "lub", "ani"]):
+                valence = self.base[item_lowercase] * N_SCALAR
+
+            # check if sentiment laden word is in ALL CAPS (while others aren't)
+            if item.isupper() and is_cap_diff:
+                if valence > 0:
+                    valence += C_INCR
+                else:
+                    valence -= C_INCR
+
+            for start_i in range(0, 3):
+                # dampen the scalar modifier of preceding words and emoticons
+                # (excluding the ones that immediately preceed the item) based
+                # on their distance from the current item.
+                if i > start_i and words_and_emoticons[i - (start_i + 1)].lower()\
+                        not in self.lexicon and base_words[i - (start_i + 1)].lower() not in self.base:
+                    s = scalar_inc_dec(base_words[i - (start_i + 1)], valence, is_cap_diff)
+                    if start_i == 1 and s != 0:
+                        s = s * 0.95
+                    if start_i == 2 and s != 0:
+                        s = s * 0.9
+                    valence = valence + s
+                    valence = self._negation_check(valence, words_and_emoticons, start_i, i)
+                    if start_i == 2:
+                        valence = self._special_idioms_check(valence, words_and_emoticons, i)
+
+            if i > 0 and item.lower() == "przynajmniej":
+                valence = valence * N_SCALAR
         sentiments.append(valence)
         return sentiments
-
-#TODO adjust to polish
-    def _least_check(self, valence, words_and_emoticons, i):
-        # check for negation case using "least"
-        if i > 1 and words_and_emoticons[i - 1].lower() not in self.lexicon \
-                and words_and_emoticons[i - 1].lower() == "least":
-            if words_and_emoticons[i - 2].lower() != "at" and words_and_emoticons[i - 2].lower() != "bardzo":
-                valence = valence * N_SCALAR
-        elif i > 0 and words_and_emoticons[i - 1].lower() not in self.lexicon \
-                and words_and_emoticons[i - 1].lower() == "least":
-            valence = valence * N_SCALAR
-        return valence
 
     @staticmethod
     def _but_check(words_and_emoticons, sentiments):
@@ -521,31 +611,6 @@ class SentimentIntensityAnalyzer(object):
 
         return sentiment_dict
 
-    def simplify_polish_words(self, sentence):
-        response = requests.post('http://localhost:9200/?output_format=conll', data=sentence.encode('utf-8'))
-        if response.status_code != 200:
-            print("requesting server failed")
-
-        string_response = str(response.content, 'utf8')
-        words = string_response.split("\\")
-        words_splitted = words[0].split()
-
-        list_of_skipped_words = ["disamb", "none", "space", "conj", "interp", "newline", "comp", "qub", "adv",
-                                 "pred"]
-        for word in words_splitted:
-            if word in list_of_skipped_words or ":" in word:
-                words_splitted.remove(word)
-
-        # second iteration, because the first one doesn't remove "disamb" w
-        for word in words_splitted:
-            if word in list_of_skipped_words or ":" in word:
-                words_splitted.remove(word)
-
-        # getting every second element as those are tagged words
-        words_splitted = words_splitted[1::2]
-        simplified_sentence = ' '.join(map(str, words_splitted))
-
-        return simplified_sentence
 
 if __name__ == '__main__':
     # --- examples -------
@@ -563,10 +628,11 @@ if __name__ == '__main__':
                  "Książka była dobra.",  # positive sentence
                  "Przynajmniej nie jest okropny.",  # negated negative sentence with contraction
                  "Książka była tylko trochę dobra.",
-                 "To był bez wątpienia najlepszy obiad w mój życie",
-                 "To był najlepszy obiad w mój życie",
+                 "To był bez wątpienia najlepszy obiad w moim życiu",
+                 "To był najlepszy obiad w moim życiu",
                  # qualified positive sentence is handled correctly (intensity adjusted)
                  "Fabuła była spoko, ale postacie słabe i zdjęcią okropne",
+                 "Ale on jest chujem",
                  # mixed negation sentence
                  "Dzisiaj jest nieco niemiły dzień!",  # negative slang with capitalization emphasis
                  "Dzisiaj jest niemiły dzień",
@@ -589,7 +655,7 @@ if __name__ == '__main__':
 
 
     for sentence in sentences:
-        sentence = analyzer.simplify_polish_words(sentence)
+        #sentence = simplify_polish_words(sentence)
         vs = analyzer.polarity_scores(sentence)
         print("{:-<65} {}".format(sentence, str(vs)))
     print("----------------------------------------------------")
