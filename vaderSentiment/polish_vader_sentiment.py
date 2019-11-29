@@ -20,6 +20,7 @@ import json
 from itertools import product
 from inspect import getsourcefile
 from io import open
+import requests
 
 # ##Constants##
 
@@ -520,10 +521,35 @@ class SentimentIntensityAnalyzer(object):
 
         return sentiment_dict
 
+    def simplify_polish_words(self, sentence):
+        response = requests.post('http://localhost:9200/?output_format=conll', data=sentence.encode('utf-8'))
+        if response.status_code != 200:
+            print("requesting server failed")
+
+        string_response = str(response.content, 'utf8')
+        words = string_response.split("\\")
+        words_splitted = words[0].split()
+
+        list_of_skipped_words = ["disamb", "none", "space", "conj", "interp", "newline", "comp", "qub", "adv",
+                                 "pred"]
+        for word in words_splitted:
+            if word in list_of_skipped_words or ":" in word:
+                words_splitted.remove(word)
+
+        # second iteration, because the first one doesn't remove "disamb" w
+        for word in words_splitted:
+            if word in list_of_skipped_words or ":" in word:
+                words_splitted.remove(word)
+
+        # getting every second element as those are tagged words
+        words_splitted = words_splitted[1::2]
+        simplified_sentence = ' '.join(map(str, words_splitted))
+
+        return simplified_sentence
 
 if __name__ == '__main__':
     # --- examples -------
-    sentences = ["VADER jest mądry, przystojny i zabawny.",  # positive sentence example
+    sentences = ["VADER jest mądrym, przystojna i zabawny.",  # positive sentence example
                  "VADER jest mądry, przystojny i zabawny!!",
                  # punctuation emphasis handled correctly (sentiment intensity adjusted)
                  "VADER jest bardzo mądry, przystojny i zabawny!",
@@ -558,10 +584,12 @@ if __name__ == '__main__':
                   Europy nasz Prezydent brał czynny, intensywny i systematyczny udział ! """# Capitalized negation
                  ]
 
+
     analyzer = SentimentIntensityAnalyzer()
 
 
     for sentence in sentences:
+        sentence = analyzer.simplify_polish_words(sentence)
         vs = analyzer.polarity_scores(sentence)
         print("{:-<65} {}".format(sentence, str(vs)))
     print("----------------------------------------------------")

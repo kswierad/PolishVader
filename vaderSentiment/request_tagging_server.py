@@ -22,5 +22,6 @@ for word in words_splitted:
 
 # getting every second element as those are tagged words
 words_splitted = words_splitted[1::2]
+words_splitted = ' '.join(map(str, words_splitted))
 
 print(words_splitted)
